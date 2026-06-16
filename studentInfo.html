@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Management System</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    min-height:100vh;
+    padding:20px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.2);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.form-group{
+    margin-bottom:15px;
+}
+
+label{
+    display:block;
+    margin-bottom:5px;
+    font-weight:bold;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    color:white;
+    margin:5px;
+}
+
+.add-btn{
+    background:#28a745;
+}
+
+.search-btn{
+    background:#007bff;
+}
+
+.edit-btn{
+    background:#ffc107;
+    color:black;
+}
+
+.delete-btn{
+    background:#dc3545;
+}
+
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse:collapse;
+}
+
+table,th,td{
+    border:1px solid #ddd;
+}
+
+th,td{
+    padding:12px;
+    text-align:center;
+}
+
+th{
+    background:#764ba2;
+    color:white;
+}
+
+.search-box{
+    margin-top:20px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>Student Management System</h1>
+
+<div class="form-group">
+<label>Name</label>
+<input type="text" id="name">
+</div>
+
+<div class="form-group">
+<label>Roll Number</label>
+<input type="text" id="roll">
+</div>
+
+<div class="form-group">
+<label>Grade</label>
+<input type="text" id="grade">
+</div>
+
+<div class="form-group">
+<label>Email</label>
+<input type="email" id="email">
+</div>
+
+<button class="add-btn" onclick="addStudent()">
+Add Student
+</button>
+
+<div class="search-box">
+<input type="text" id="search" placeholder="Search by Roll Number">
+<button class="search-btn" onclick="searchStudent()">
+Search
+</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Roll No</th>
+<th>Grade</th>
+<th>Email</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="studentTable">
+</tbody>
+</table>
+
+</div>
+
+<script>
+
+let students = JSON.parse(localStorage.getItem("students")) || [];
+
+function saveData(){
+    localStorage.setItem("students",JSON.stringify(students));
+}
+
+function addStudent(){
+
+    let name=document.getElementById("name").value.trim();
+    let roll=document.getElementById("roll").value.trim();
+    let grade=document.getElementById("grade").value.trim();
+    let email=document.getElementById("email").value.trim();
+
+    if(name==="" || roll==="" || grade==="" || email===""){
+        alert("All fields are required!");
+        return;
+    }
+
+    let emailPattern=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if(!emailPattern.test(email)){
+        alert("Invalid Email Format");
+        return;
+    }
+
+    let student={
+        name,
+        roll,
+        grade,
+        email
+    };
+
+    students.push(student);
+
+    saveData();
+    displayStudents();
+
+    document.getElementById("name").value="";
+    document.getElementById("roll").value="";
+    document.getElementById("grade").value="";
+    document.getElementById("email").value="";
+}
+
+function displayStudents(){
+
+    let table=document.getElementById("studentTable");
+
+    table.innerHTML="";
+
+    students.forEach((student,index)=>{
+
+        table.innerHTML+=`
+        <tr>
+            <td>${student.name}</td>
+            <td>${student.roll}</td>
+            <td>${student.grade}</td>
+            <td>${student.email}</td>
+
+            <td>
+            <button class="edit-btn"
+            onclick="editStudent(${index})">
+            Edit
+            </button>
+
+            <button class="delete-btn"
+            onclick="deleteStudent(${index})">
+            Delete
+            </button>
+            </td>
+        </tr>
+        `;
+    });
+}
+
+function deleteStudent(index){
+
+    if(confirm("Delete this student?")){
+        students.splice(index,1);
+        saveData();
+        displayStudents();
+    }
+}
+
+function editStudent(index){
+
+    let student=students[index];
+
+    let newName=prompt("Enter Name",student.name);
+    let newGrade=prompt("Enter Grade",student.grade);
+
+    if(newName && newGrade){
+        student.name=newName;
+        student.grade=newGrade;
+
+        saveData();
+        displayStudents();
+    }
+}
+
+function searchStudent(){
+
+    let roll=document.getElementById("search").value.trim();
+
+    let result=students.find(
+        student=>student.roll===roll
+    );
+
+    if(result){
+        alert(
+            `Name: ${result.name}
+Roll: ${result.roll}
+Grade: ${result.grade}
+Email: ${result.email}`
+        );
+    }
+    else{
+        alert("Student Not Found");
+    }
+}
+
+displayStudents();
+
+</script>
+
+</body>
+</html>
